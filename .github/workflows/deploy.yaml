@@ -1,0 +1,48 @@
+name: Terraform CI/CD Pipeline for deploying AWS resources
+run-name: ${{ github.actor }} has triggered the pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-infra:
+    name: terraform-ci-cd
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init -input=false
+        working-directory: ./Terraform-VPC
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+        working-directory: ./Terraform-VPC
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ./Terraform-VPC
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out=tfplan
+        working-directory: ./Terraform-VPC
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        working-directory: ./Terraform-VPC
