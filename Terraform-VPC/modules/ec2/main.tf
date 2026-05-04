@@ -1,6 +1,6 @@
 resource "aws_instance" "web" {
   count                       = length(var.ec2_names)
-  ami                         = "ami-09e320d375d7b8d3e"
+  ami                         = "ami-09e320d375d7b8d3e" # Hardcoded (not recommended)
   instance_type               = "t3.micro"
   associate_public_ip_address = true
   subnet_id                   = var.subnets[count.index]
